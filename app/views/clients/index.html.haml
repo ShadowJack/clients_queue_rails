@@ -1,0 +1,13 @@
+%h3 Main
+.container-fluid
+  .row
+    .col-md-4{id: 'left-col'}
+      =form_for @client, url: { action: 'create' } do |f|
+        .form-group
+          =f.label :operation
+          =f.select :operation, ['O1', 'O2', 'O3']
+        .form-group
+          =f.label :length
+          =f.text_field :length, size: 20
+        =f.submit
+    .col-md-4{id: 'right-col'}
