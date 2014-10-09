@@ -1,3 +1,5 @@
+#TODO: if current step > last finisher - the window is free 
+
 ##
 # Client model:
 #   id:serial
@@ -46,11 +48,21 @@ class Client < ActiveRecord::Base
                     window: window)
     else                          # Enqueue client
       earlier_finisher = candidates.min { |a, b| a.finish <=> b.finish }
-      Client.create(operation: operation,
-                    length: length,
-                    start: (earlier_finisher.finish + 1),
-                    finish: (earlier_finisher.finish + length),
-                    window: earlier_finisher.window)
+      # important: if window is clear now, then add new client not
+      # after last, but after current step
+      new_client_start = [earlier_finisher.finish, step].max
+      if earlier_finisher.finish + length <= 50
+        Client.create(operation: operation,
+                      length: length,
+                      start: (new_client_start + 1),
+                      finish: (new_client_start + length),
+                      window: earlier_finisher.window)
+      else                        # We can't serve this client
+        Client.create(operation: operation,
+                      length: length,
+                      start: 0,
+                      finish: 0)
+      end
     end
   end
    

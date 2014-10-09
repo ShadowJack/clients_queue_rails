@@ -1,11 +1,11 @@
-MAX_LENGTH = 20     # Maximum length of client's task to generate
-MAX_STEP = 10
+MAX_LENGTH = 10     # Maximum length of client's task to generate
+MAX_STEP = 50
 interval = null
 step = 1
 
 # Generates client randomly
 gen_client = ->
-  must_generate = Math.random() < 0.8
+  must_generate = Math.random() < 0.5
   if not must_generate
     return { operation: false, length: false }
   client = 
@@ -22,9 +22,19 @@ add_new_row = (data) ->
   a = if data.hasOwnProperty('a') then data.a else '-'
   b = if data.hasOwnProperty('b') then data.b else '-'
   c = if data.hasOwnProperty('c') then data.c else '-'
-  client = if data.hasOwnProperty('client') then  'Added new client X' + data.client.id + 
-                                                  ' with oper ' + data.client.operation +
-                                                  ' and length of ' + data.client.length else '-'
+  
+  # we check if there is start and finish cause if they are eql to 0
+  # then it means this client was rejected
+  if data.hasOwnProperty('client')
+    client = 'client X' + data.client.id +
+            ' with operation ' + data.client.operation +
+            ' and length of ' + data.client.length
+    if data.client.start > 0
+      client = 'Added new ' + client + ' to window ' + data.client.window
+    else
+      client = 'Rejected ' + client
+  else
+    client = '-'
   $new_row = $('<tr><td class="step-col">' + step +
                '</td><td class="a-col">' + a + 
                '</td><td class="b-col">' + b + 
