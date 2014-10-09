@@ -1,13 +1,16 @@
 %h3 Main
 .container-fluid
   .row
-    .col-md-4{id: 'left-col'}
-      =form_for @client, url: { action: 'create' } do |f|
-        .form-group
-          =f.label :operation
-          =f.select :operation, ['O1', 'O2', 'O3']
-        .form-group
-          =f.label :length
-          =f.text_field :length, size: 20
-        =f.submit
-    .col-md-4{id: 'right-col'}
+    .col-md-12
+      #user-queued
+  .row
+    #col.col-md-12
+      %table
+        %thead
+          %td{ class: 'step-col' } Step
+          %td{ class: 'a-col' } A
+          %td{ class: 'b-col' } B
+          %td{ class: 'c-col' } C
+          %td{ class: 'client-col' } Client
+        %tbody{ id: 'status-table' }
+          

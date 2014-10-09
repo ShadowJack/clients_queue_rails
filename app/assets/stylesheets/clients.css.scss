@@ -1,9 +1,30 @@
-#left-col {
+#col {
   background-color: #D9F7EE;
   height: 600px;
+  
+  table {
+    width: 800px;
+  }
+  
+  .step-col {
+    width: 50px;
+    text-align: center;
+  }
+  
+  .a-col, .b-col, .c-col {
+    width: 70px;
+    text-align: center;
+  }
+  
+  .client-col {
+    width: 400px;
+    text-align: center;
+  }
+  
+  
 }
 
-#right-col {
-  background-color: #F7FFE3;
-  height: 600px;
+#user-queued {
+  background-color: #EFFFE9;
+  height: 100px;
 }

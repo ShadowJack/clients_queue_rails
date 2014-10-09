@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141008165241) do
+ActiveRecord::Schema.define(version: 20141009094740) do
 
   create_table "clients", force: true do |t|
     t.string   "operation",  limit: 2
@@ -19,6 +19,12 @@ ActiveRecord::Schema.define(version: 20141008165241) do
     t.integer  "length",     limit: 1
     t.integer  "finish",     limit: 1
     t.string   "window",     limit: 1
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "steps", force: true do |t|
+    t.integer  "step",       limit: 2
     t.datetime "created_at"
     t.datetime "updated_at"
   end
