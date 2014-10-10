@@ -55,6 +55,15 @@ operate = ->
       clearInterval(interval)
   )
 
+# Sets options from the textfields
+set_options = ->
+  if $('#max_length').val() != ''
+    max_length = parseInt($('#max_length').val(), 10)
+    console.log "Max length: ", max_length
+  if $('#prob').val() != ''
+    client_gen_prob = parseFloat($('#prob').val())
+    console.log "Prob: ", client_gen_prob
+  
 
 # -----------------Execution starts here-----------------
 #
@@ -62,12 +71,11 @@ operate = ->
 # get new info about queue state by ajax request  
 $(->
   $('#sbmt').click ->
-    if $('#max_length').val() != ''
-      max_length = parseInt($('#max_length').val(), 10)
-      console.log "Max length: ", max_length
-    if $('#prob').val() != ''
-      client_gen_prob = parseFloat($('#prob').val())
-      console.log "Prob: ", client_gen_prob
+    set_options()
+    step = 1
+    if interval != null
+      clearInterval(interval)
+    $('#status-table').empty()
     $.post('/clients/clean', {}, (data)->
       interval = setInterval(operate, 1000)
     )
