@@ -1,5 +1,3 @@
-#TODO: if current step > last finisher - the window is free 
-
 ##
 # Client model:
 #   id:serial
@@ -9,6 +7,8 @@
 #   finish:integer{2}
 #   window:string{1}
 class Client < ActiveRecord::Base
+  MAX_STEP = 100
+
   def self.produce_operations(params)
     step = params[:step].to_i
     new_client = nil
@@ -32,16 +32,20 @@ class Client < ActiveRecord::Base
       'O2' => ['a', 'b'],
       'O3' => ['b', 'c']
     }
+    next_number = count() + 1
+    logger.info "Number of rows: " + next_number.to_s
     candidates = where(window: windows[operation]).group(:window).having("finish = max(finish)").to_a
     if (candidates.count == 0) # None of the windows is busy
-      Client.create(operation: operation,
+      Client.create(number: next_number,
+                    operation: operation,
                     length: length,
                     start: (step + 1),
                     finish: (step + length),
                     window: windows[operation].sample)
     elsif (candidates.count == 1) # One window is free
       window = (windows[operation] - [candidates[0].window])[0] # get free window
-      Client.create(operation: operation,
+      Client.create(number: next_number,
+                    operation: operation,
                     length: length,
                     start: (step + 1),
                     finish: (step + length),
@@ -51,14 +55,16 @@ class Client < ActiveRecord::Base
       # important: if window is clear now, then add new client not
       # after last, but after current step
       new_client_start = [earlier_finisher.finish, step].max
-      if earlier_finisher.finish + length <= 50
-        Client.create(operation: operation,
+      if earlier_finisher.finish + length <= MAX_STEP
+        Client.create(number: next_number,
+                      operation: operation,
                       length: length,
                       start: (new_client_start + 1),
                       finish: (new_client_start + length),
                       window: earlier_finisher.window)
       else                        # We can't serve this client
-        Client.create(operation: operation,
+        Client.create(number: next_number,
+                      operation: operation,
                       length: length,
                       start: 0,
                       finish: 0)
@@ -68,7 +74,7 @@ class Client < ActiveRecord::Base
    
   def self.get_curr_windows_state(step)
     where("start <= ? AND finish >= ? ", step, step).to_a.inject({ }) do |sum, client|
-      sum[client.window.to_sym] = "X" + client.id.to_s + "(" + client.operation + "-" + client.length.to_s + ")"
+      sum[client.window.to_sym] = "X" + client.number.to_s + "(" + client.operation + "-" + client.length.to_s + ")"
       sum
     end
   end

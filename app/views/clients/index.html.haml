@@ -1,10 +1,7 @@
-%h3 Main
+%h3 Queue
 .container-fluid
   .row
-    .col-md-12
-      #user-queued
-  .row
-    #col.col-md-12
+    #main-col.col-md-8
       %table
         %thead
           %td{ class: 'step-col' } Step
@@ -13,4 +10,11 @@
           %td{ class: 'c-col' } C
           %td{ class: 'client-col' } Client
         %tbody{ id: 'status-table' }
-          
+    #opt-col.col-md-4
+      .form-group
+        =label_tag 'max_length', 'Maximum task length'
+        =text_field_tag 'max_length', '10', size: 15, maxlength: 2
+      .form-group
+        =label_tag 'prob', 'Probability barrier'
+        =text_field_tag 'prob', '0.5', size: 15, id: 'prob'
+      =button_tag 'Start', type: 'button', id: 'sbmt'
