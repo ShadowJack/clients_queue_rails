@@ -1,4 +1,4 @@
-MAX_STEP = 100           # The length of the day
+MAX_STEP = 100          # The length of the day
 max_length = 10         # Maximum length of client's task to generate
 client_gen_prob = 0.5   # Probability of client to be genegated this step 
 interval = null         # global interval that supports main operation utility

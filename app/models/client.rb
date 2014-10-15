@@ -1,6 +1,7 @@
 ##
 # Client model:
 #   id:serial
+#	number:integer{2}
 #   operation:string{2}
 #   length:integer{2}
 #   start:integer{2}
@@ -32,48 +33,38 @@ class Client < ActiveRecord::Base
       'O2' => ['a', 'b'],
       'O3' => ['b', 'c']
     }
-    next_number = count() + 1
-    logger.info "Number of rows: " + next_number.to_s
-    candidates = where(window: windows[operation]).group(:window).having("finish = max(finish)").to_a
-    if (candidates.count == 0) # None of the windows is busy
-      Client.create(number: next_number,
-                    operation: operation,
-                    length: length,
-                    start: (step + 1),
-                    finish: (step + length),
-                    window: windows[operation].sample)
-    elsif (candidates.count == 1) # One window is free
-      window = (windows[operation] - [candidates[0].window])[0] # get free window
-      Client.create(number: next_number,
-                    operation: operation,
-                    length: length,
-                    start: (step + 1),
-                    finish: (step + length),
-                    window: window)
-    else                          # Enqueue client
+
+    candidates = where(window: windows[operation]).group(:window).having('finish = max(finish)').to_a
+    start = 0
+    window = 'r'
+    if candidates.count == 2 # Both windows are busy
       earlier_finisher = candidates.min { |a, b| a.finish <=> b.finish }
-      # important: if window is clear now, then add new client not
-      # after last, but after current step
-      new_client_start = [earlier_finisher.finish, step].max
-      if earlier_finisher.finish + length <= MAX_STEP
-        Client.create(number: next_number,
-                      operation: operation,
-                      length: length,
-                      start: (new_client_start + 1),
-                      finish: (new_client_start + length),
-                      window: earlier_finisher.window)
-      else                        # We can't serve this client
-        Client.create(number: next_number,
-                      operation: operation,
-                      length: length,
-                      start: 0,
-                      finish: 0)
+      max_step_finish = [earlier_finisher.finish, step].max
+      if max_step_finish + length <= MAX_STEP
+        # if window is clear now, then add new client not
+        # after last served, but after current step
+        start = max_step_finish + 1
+        window = earlier_finisher.window
       end
+    elsif candidates.count == 1 # One window is free
+      start = step + 1
+      window = (windows[operation] - [candidates[0].window])[0] # get free window
+    else # None of the windows is busy
+      start = step + 1
+      window = windows[operation].sample
     end
+    number = count + 1
+    finish = start + length - 1
+    Client.create(number: number,
+                  operation: operation,
+                  length: length,
+                  start: start,
+                  finish: finish,
+                  window: window)
   end
-   
+
   def self.get_curr_windows_state(step)
-    where("start <= ? AND finish >= ? ", step, step).to_a.inject({ }) do |sum, client|
+    where("start <= ? AND finish >= ? AND window <> 'r'", step, step).to_a.inject({ }) do |sum, client|
       sum[client.window.to_sym] = "X" + client.number.to_s + "(" + client.operation + "-" + client.length.to_s + ")"
       sum
     end
